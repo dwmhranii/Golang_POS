@@ -1,13 +1,15 @@
 package controllers
 
 import (
-    "github.com/gofiber/fiber/v2"
-    "golang.org/x/crypto/bcrypt"
-    "golang_pos/config"
-    "golang_pos/models"
-    "time"
-    "github.com/golang-jwt/jwt/v4"
+	"golang_pos/config"
+	"golang_pos/models"
 
+	"github.com/gofiber/fiber/v2"
+	"golang.org/x/crypto/bcrypt"
+
+	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // Fungsi untuk registrasi pengguna baru

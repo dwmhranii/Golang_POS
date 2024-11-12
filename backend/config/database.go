@@ -2,11 +2,12 @@
 package config
 
 import (
-    "gorm.io/driver/postgres"
-    "gorm.io/gorm"
-    "log"
-    "os"
-    "golang_pos/models"
+	"golang_pos/models"
+	"log"
+	"os"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
@@ -15,7 +16,7 @@ func ConnectDatabase() (*gorm.DB, error) {
     // Ambil DSN dari environment
     dsn := os.Getenv("DB_DSN")
     if dsn == "" {
-        dsn = "host=localhost user=postgres password=admin dbname=pos_project port=5432 sslmode=disable" // Default DSN jika .env tidak diatur
+        dsn = "host=localhost user=postgres password=admin dbname=pos_project port=5432 sslmode=disable"
     }
 
     database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
