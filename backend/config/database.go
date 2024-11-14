@@ -13,7 +13,6 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() (*gorm.DB, error) {
-    // Ambil DSN dari environment
     dsn := os.Getenv("DB_DSN")
     if dsn == "" {
         dsn = "host=localhost user=postgres password=admin dbname=pos_project port=5432 sslmode=disable"
@@ -25,7 +24,6 @@ func ConnectDatabase() (*gorm.DB, error) {
         return nil, err
     }
 
-    // Jalankan migrasi pada model-model
     err = database.AutoMigrate(
         &models.User{},
         &models.Product{},
