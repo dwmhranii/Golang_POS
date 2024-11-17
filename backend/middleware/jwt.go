@@ -39,3 +39,21 @@ func JWTMiddleware(c *fiber.Ctx) error {
 
 	return c.Next()
 }
+
+// Middleware untuk memastikan hanya admin yang dapat mengakses
+func RequireAdmin(c *fiber.Ctx) error {
+	role := c.Locals("role")
+	if role != "admin" {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied, admin only"})
+	}
+	return c.Next()
+}
+
+// Middleware untuk memastikan hanya role yang diperbolehkan (admin/cashier/reseller) yang bisa membaca
+func AllowReadOnly(c *fiber.Ctx) error {
+	role := c.Locals("role")
+	if role == nil || !(role == "admin" || role == "cashier" || role == "reseller") {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied, read-only access allowed"})
+	}
+	return c.Next()
+}

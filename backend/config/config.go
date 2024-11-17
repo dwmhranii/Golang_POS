@@ -1,14 +1,26 @@
 package config
 
 import (
-    "os"
-    "github.com/joho/godotenv"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func LoadEnv() {
-    godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
+	}
+}
+
+func GetEnv(key, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+	return value
 }
 
 func GetJWTSecret() string {
-    return os.Getenv("JWT_SECRET")
+	return GetEnv("JWT_SECRET", "defaultsecret")
 }

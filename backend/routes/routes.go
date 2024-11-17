@@ -29,30 +29,38 @@ func Setup(app *fiber.App) {
     product.Put("/:id", controllers.UpdateProduct)       // Update product
     product.Delete("/:id", controllers.DeleteProduct)    // Delete product
 
-
-    // CRUD operasi pada sales
-    sale := api.Group("/sales")
-    sale.Post("/", controllers.CreateSale)         // Create sale
-    sale.Get("/", controllers.GetSales)            // Read All sales
-    sale.Get("/:id", controllers.GetSale)          // Read One sale
-    sale.Put("/:id", controllers.UpdateSale)       // Update sale
-    sale.Delete("/:id", controllers.DeleteSale)    // Delete sale
-
-
-    // CRUD operasi pada purchases
-    purchase := api.Group("/purchases")
-    purchase.Post("/", controllers.CreatePurchase)         // Create purchase
-    purchase.Get("/", controllers.GetPurchases)            // Read All purchases
-    purchase.Get("/:id", controllers.GetPurchase)          // Read One purchase
-    purchase.Put("/:id", controllers.UpdatePurchase)       // Update purchase
-    purchase.Delete("/:id", controllers.DeletePurchase)    // Delete purchase
+    // CRUD operasi pada category
+    category := api.Group("/categories")
+    category.Post("/", controllers.CreateCategory)       // Create category
+    category.Get("/", controllers.GetCategories)         // Read All categories
+    category.Get("/:id", controllers.GetCategory)        // Read One category
+    category.Put("/:id", controllers.UpdateCategory)     // Update category
+    category.Delete("/:id", controllers.DeleteCategory)  // Delete category
 
 
-    // CRUD operasi pada expenses
-    expense := api.Group("/expenses")
-    expense.Post("/", controllers.CreateExpense)
-    expense.Get("/", controllers.GetExpenses)
-    expense.Get("/:id", controllers.GetExpense)
-    expense.Put("/:id", controllers.UpdateExpense)
-    expense.Delete("/:id", controllers.DeleteExpense)
+//     // CRUD operasi pada sales
+//     sale := api.Group("/sales")
+//     sale.Post("/", controllers.CreateSale)         // Create sale
+//     sale.Get("/", controllers.GetSales)            // Read All sales
+//     sale.Get("/:id", controllers.GetSale)          // Read One sale
+//     sale.Put("/:id", controllers.UpdateSale)       // Update sale
+//     sale.Delete("/:id", controllers.DeleteSale)    // Delete sale
+
+
+//     // CRUD operasi pada purchases
+//     purchase := api.Group("/purchases")
+//     purchase.Post("/", controllers.CreatePurchase)         // Create purchase
+//     purchase.Get("/", controllers.GetPurchases)            // Read All purchases
+//     purchase.Get("/:id", controllers.GetPurchase)          // Read One purchase
+//     purchase.Put("/:id", controllers.UpdatePurchase)       // Update purchase
+//     purchase.Delete("/:id", controllers.DeletePurchase)    // Delete purchase
+
+
+//     // CRUD operasi pada expenses
+//     expense := api.Group("/expenses")
+//     expense.Post("/", controllers.CreateExpense)
+//     expense.Get("/", controllers.GetExpenses)
+//     expense.Get("/:id", controllers.GetExpense)
+//     expense.Put("/:id", controllers.UpdateExpense)
+//     expense.Delete("/:id", controllers.DeleteExpense)
 }
