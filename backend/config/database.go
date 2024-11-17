@@ -29,11 +29,9 @@ func ConnectDatabase() (*gorm.DB, error) {
         &models.Product{},
         &models.Category{},
         // // &models.Reseller{},
-        // &models.Sale{},
-        // &models.SalesItem{},
+        &models.Sale{},
+        &models.SalesItem{},
         // // &models.Purchase{},
-        // &models.Expense{},
-        // // &models.ProfitLoss{},
         // // &models.Session{},
     )
     if err != nil {

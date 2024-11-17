@@ -38,13 +38,16 @@ func Setup(app *fiber.App) {
     category.Delete("/:id", controllers.DeleteCategory)  // Delete category
 
 
-//     // CRUD operasi pada sales
-//     sale := api.Group("/sales")
-//     sale.Post("/", controllers.CreateSale)         // Create sale
-//     sale.Get("/", controllers.GetSales)            // Read All sales
-//     sale.Get("/:id", controllers.GetSale)          // Read One sale
-//     sale.Put("/:id", controllers.UpdateSale)       // Update sale
-//     sale.Delete("/:id", controllers.DeleteSale)    // Delete sale
+    // CRUD operasi pada sales
+    sales := api.Group("/sales")
+    sales.Post("/", controllers.CreateSale)                // Create a new sale
+    sales.Get("/", controllers.GetSales)                   // Get sales with pagination
+    sales.Put("/:id", controllers.UpdateSale)              // Update sale by ID
+    sales.Delete("/:id", controllers.DeleteSale)           // Delete sale by ID
+
+    // Export routes
+    sales.Get("/export/excel", controllers.ExportSalesToExcel) // Export sales to Excel
+    sales.Get("/export/pdf", controllers.ExportSalesToPDF)     // Export sales to PDF
 
 
 //     // CRUD operasi pada purchases
