@@ -28,7 +28,6 @@ func ConnectDatabase() (*gorm.DB, error) {
         &models.User{},
         &models.Product{},
         &models.Category{},
-        // // &models.Reseller{},
         &models.Sale{},
         &models.SalesItem{},
         // // &models.Purchase{},
