@@ -8,33 +8,34 @@ import (
 
 // Create Purchase
 func CreatePurchase(c *fiber.Ctx) error {
-	db := c.Locals("db").(*gorm.DB)
-	purchase := new(models.Purchase)
+    db := c.Locals("db").(*gorm.DB)
+    purchase := new(models.Purchase)
 
-	// Parsing body JSON
-	if err := c.BodyParser(purchase); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
-	}
+    // Parsing body JSON
+    if err := c.BodyParser(purchase); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
+    }
 
-	// Validasi input
-	if purchase.Quantity <= 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Quantity must be greater than 0"})
-	}
+    // Validasi input
+    if purchase.Quantity <= 0 {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Quantity must be greater than 0"})
+    }
 
-	if purchase.CostPrice < 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cost Price cannot be negative"})
-	}
+    if purchase.CostPrice < 0 {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cost Price cannot be negative"})
+    }
 
-	// Hitung TotalCost
-	purchase.TotalCost = float64(purchase.Quantity) * purchase.CostPrice
+    // Hitung TotalCost
+    purchase.TotalCost = float64(purchase.Quantity) * purchase.CostPrice
 
-	// Insert ke database
-	if err := db.Create(&purchase).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
+    // Insert ke database
+    if err := db.Create(&purchase).Error; err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+    }
 
-	return c.Status(fiber.StatusCreated).JSON(purchase)
+    return c.Status(fiber.StatusCreated).JSON(purchase)
 }
+
 
 // Get All Purchases
 func GetPurchases(c *fiber.Ctx) error {
