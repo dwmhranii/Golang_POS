@@ -20,9 +20,8 @@ func CreateSale(c *fiber.Ctx) error {
 	type SaleRequest struct {
 		SaleCode string `json:"sale_code"`
 		Items    []struct {
-			ProductID uint    `json:"product_id"`
-			Quantity  int     `json:"quantity"`
-			UnitPrice float64 `json:"unit_price"`
+			ProductID uint `json:"product_id"`
+			Quantity  int  `json:"quantity"`
 		} `json:"items"`
 	}
 
@@ -60,8 +59,8 @@ func CreateSale(c *fiber.Ctx) error {
 		}
 
 		// Hitung total harga dan profit
-		totalPrice := float64(item.Quantity) * item.UnitPrice
-		profit := float64(item.Quantity) * (item.UnitPrice - product.CostPrice)
+		totalPrice := float64(item.Quantity) * product.SellingPrice // Ambil UnitPrice dari produk
+		profit := float64(item.Quantity) * (product.SellingPrice - product.CostPrice)
 
 		// Kurangi stok produk
 		product.Stock -= item.Quantity
@@ -73,9 +72,9 @@ func CreateSale(c *fiber.Ctx) error {
 		sale.Items = append(sale.Items, models.SalesItem{
 			ProductID:  item.ProductID,
 			Quantity:   item.Quantity,
-			UnitPrice:  item.UnitPrice,
-			TotalPrice: totalPrice, // Hitung manual
-			Profit:     profit,     // Hitung manual
+			UnitPrice:  product.SellingPrice, // Ambil UnitPrice dari produk
+			TotalPrice: totalPrice,        // Hitung manual
+			Profit:     profit,            // Hitung manual
 		})
 
 		// Update totalAmount dan totalProfit
@@ -100,6 +99,7 @@ func CreateSale(c *fiber.Ctx) error {
 		"data":    sale,
 	})
 }
+
 
 // GetSales - Ambil semua data penjualan dengan pagination
 func GetSales(c *fiber.Ctx) error {
