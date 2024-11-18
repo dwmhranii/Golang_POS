@@ -1,11 +1,6 @@
 package models
 
-import (
-	// "errors"
-	"time"
-
-	// "gorm.io/gorm"
-)
+import "time"
 
 type Product struct {
 	ProductID    uint      `gorm:"primaryKey" json:"product_id"`
@@ -14,9 +9,8 @@ type Product struct {
 	CostPrice    float64   `gorm:"type:decimal(10,2);not null" json:"cost_price"`
 	SellingPrice float64   `gorm:"type:decimal(10,2);not null" json:"selling_price"`
 	Stock        int       `gorm:"default:0;check:stock >= 0" json:"stock"`
-	CategoryID   uint      `gorm:"not null" json:"category_id"`        // Foreign key ke Category
-	Category     Category  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"category"` // Relasi ke Category
+	CategoryID   uint      `gorm:"not null" json:"category_id"`
+	Category     *Category `gorm:"foreignKey:CategoryID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"category,omitempty"`
 	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
-

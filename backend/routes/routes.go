@@ -50,13 +50,13 @@ func Setup(app *fiber.App) {
     sales.Get("/export/pdf", controllers.ExportSalesToPDF)     // Export sales to PDF
 
 
-//     // CRUD operasi pada purchases
-//     purchase := api.Group("/purchases")
-//     purchase.Post("/", controllers.CreatePurchase)         // Create purchase
-//     purchase.Get("/", controllers.GetPurchases)            // Read All purchases
-//     purchase.Get("/:id", controllers.GetPurchase)          // Read One purchase
-//     purchase.Put("/:id", controllers.UpdatePurchase)       // Update purchase
-//     purchase.Delete("/:id", controllers.DeletePurchase)    // Delete purchase
+    // CRUD operasi pada purchases
+    purchase := api.Group("/purchases")
+    purchase.Post("/", controllers.CreatePurchase)         // Create purchase
+    purchase.Get("/", controllers.GetPurchases)            // Read All purchases
+    purchase.Get("/:id", controllers.GetPurchase)          // Read One purchase
+    purchase.Put("/:id", controllers.UpdatePurchase)       // Update purchase
+    purchase.Delete("/:id", controllers.DeletePurchase)    // Delete purchase
 
 
 //     // CRUD operasi pada expenses

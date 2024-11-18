@@ -2,7 +2,7 @@
 package config
 
 import (
-	"golang_pos/models"
+	// "golang_pos/models"
 	"log"
 	"os"
 
@@ -15,7 +15,7 @@ var DB *gorm.DB
 func ConnectDatabase() (*gorm.DB, error) {
     dsn := os.Getenv("DB_DSN")
     if dsn == "" {
-        dsn = "host=localhost user=postgres password=admin dbname=pos2 port=5432 sslmode=disable"
+        dsn = "host=localhost user=postgres password=admin dbname=pos5 port=5432 sslmode=disable"
     }
 
     database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -25,12 +25,12 @@ func ConnectDatabase() (*gorm.DB, error) {
     }
 
     err = database.AutoMigrate(
-        &models.User{},
-        &models.Product{},
-        &models.Category{},
-        &models.Sale{},
-        &models.SalesItem{},
-        // // &models.Purchase{},
+        // &models.User{},
+        // &models.Product{},
+        // &models.Category{},
+        // &models.Sale{},
+        // &models.SalesItem{},
+        // &models.Purchase{},
         // // &models.Session{},
     )
     if err != nil {

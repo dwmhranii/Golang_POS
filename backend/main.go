@@ -33,7 +33,7 @@ func main() {
 
     // Set up routes
     routes.Setup(app)
-
+    
     // Start the server
     log.Fatal(app.Listen(":3010"))
 }

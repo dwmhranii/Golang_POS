@@ -12,7 +12,6 @@ import (
 
 func JWTMiddleware(c *fiber.Ctx) error {
 	authHeader := c.Get("Authorization")
-
 	if !strings.HasPrefix(authHeader, "Bearer ") {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid authorization header"})
 	}
@@ -23,7 +22,6 @@ func JWTMiddleware(c *fiber.Ctx) error {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-
 		return []byte(config.GetJWTSecret()), nil
 	})
 
@@ -34,7 +32,13 @@ func JWTMiddleware(c *fiber.Ctx) error {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userID := claims["user_id"]
-		log.Println("User ID:", userID)
+		role := claims["role"]
+
+		// Simpan ke dalam `c.Locals` untuk digunakan di handler berikutnya
+		c.Locals("user_id", userID)
+		c.Locals("role", role)
+
+		log.Println("User ID:", userID, "Role:", role)
 	}
 
 	return c.Next()
