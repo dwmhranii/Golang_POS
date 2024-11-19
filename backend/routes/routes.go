@@ -59,11 +59,11 @@ func Setup(app *fiber.App) {
     purchase.Delete("/:id", controllers.DeletePurchase)    // Delete purchase
 
 
-//     // CRUD operasi pada expenses
-//     expense := api.Group("/expenses")
-//     expense.Post("/", controllers.CreateExpense)
-//     expense.Get("/", controllers.GetExpenses)
-//     expense.Get("/:id", controllers.GetExpense)
-//     expense.Put("/:id", controllers.UpdateExpense)
-//     expense.Delete("/:id", controllers.DeleteExpense)
+    // CRUD operasi pada expenses
+    expense := api.Group("/expenses")
+    expense.Post("/", controllers.CreateExpense)
+    expense.Get("/", controllers.GetExpenses)
+    expense.Get("/:id", controllers.GetExpense)
+    expense.Put("/:id", controllers.UpdateExpense)
+    expense.Delete("/:id", controllers.DeleteExpense)
 }
