@@ -1,86 +1,98 @@
 package controllers
 
-// import (
-//     "github.com/gofiber/fiber/v2"
-//     "gorm.io/gorm"
-//     "golang_pos/models"
-// )
+import (
+	"golang_pos/models"
+	"time"
 
-// // Create Expense
-// func CreateExpense(c *fiber.Ctx) error {
-//     db := c.Locals("db").(*gorm.DB)
-//     expense := new(models.Expense)
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
+)
 
-//     if err := c.BodyParser(expense); err != nil {
-//         return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
-//     }
+var validate = validator.New()
 
-//     if err := db.Create(&expense).Error; err != nil {
-//         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not create expense"})
-//     }
+// Create Expense
+func CreateExpense(c *fiber.Ctx) error {
+    db := c.Locals("db").(*gorm.DB)
+    expense := new(models.Expense)
 
-//     return c.Status(fiber.StatusCreated).JSON(expense)
-// }
+    // Parse input
+    if err := c.BodyParser(expense); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
+    }
 
-// // Get All Expenses
-// func GetExpenses(c *fiber.Ctx) error {
-//     db := c.Locals("db").(*gorm.DB)
-//     var expenses []models.Expense
+    // Validasi input
+    if err := validate.Struct(expense); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+    }
 
-//     if err := db.Find(&expenses).Error; err != nil {
-//         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not retrieve expenses"})
-//     }
+    // Atur waktu secara otomatis jika tidak ada
+    if expense.Date.IsZero() {
+        expense.Date = time.Now()
+    }
 
-//     return c.JSON(expenses)
-// }
+    // Simpan ke database
+    if err := db.Create(&expense).Error; err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not create expense"})
+    }
 
-// // Get Expense by ID
-// func GetExpense(c *fiber.Ctx) error {
-//     db := c.Locals("db").(*gorm.DB)
-//     var expense models.Expense
+    return c.Status(fiber.StatusCreated).JSON(expense)
+}
 
-//     id := c.Params("id")
-//     if err := db.First(&expense, id).Error; err != nil {
-//         return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Expense not found"})
-//     }
+// Update Expense by ID
+func UpdateExpense(c *fiber.Ctx) error {
+    db := c.Locals("db").(*gorm.DB)
+    var expense models.Expense
 
-//     return c.JSON(expense)
-// }
+    id := c.Params("id")
+    if err := db.First(&expense, id).Error; err != nil {
+        return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Expense not found"})
+    }
 
-// // Update Expense by ID
-// func UpdateExpense(c *fiber.Ctx) error {
-//     db := c.Locals("db").(*gorm.DB)
-//     var expense models.Expense
+    // Parse input
+    updateInput := new(models.Expense)
+    if err := c.BodyParser(updateInput); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
+    }
 
-//     id := c.Params("id")
-//     if err := db.First(&expense, id).Error; err != nil {
-//         return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Expense not found"})
-//     }
+    // Validasi input
+    if err := validate.Struct(updateInput); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+    }
 
-//     if err := c.BodyParser(&expense); err != nil {
-//         return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
-//     }
+    // Partial update hanya field yang relevan
+    if updateInput.Description != "" {
+        expense.Description = updateInput.Description
+    }
+    if updateInput.Amount > 0 {
+        expense.Amount = updateInput.Amount
+    }
+    if !updateInput.Date.IsZero() {
+        expense.Date = updateInput.Date
+    }
 
-//     if err := db.Save(&expense).Error; err != nil {
-//         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not update expense"})
-//     }
+    // Simpan ke database
+    if err := db.Save(&expense).Error; err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not update expense"})
+    }
 
-//     return c.JSON(expense)
-// }
+    return c.JSON(expense)
+}
 
-// // Delete Expense by ID
-// func DeleteExpense(c *fiber.Ctx) error {
-//     db := c.Locals("db").(*gorm.DB)
-//     var expense models.Expense
+// Delete Expense by ID
+func DeleteExpense(c *fiber.Ctx) error {
+    db := c.Locals("db").(*gorm.DB)
+    var expense models.Expense
 
-//     id := c.Params("id")
-//     if err := db.First(&expense, id).Error; err != nil {
-//         return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Expense not found"})
-//     }
+    id := c.Params("id")
+    if err := db.First(&expense, id).Error; err != nil {
+        return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Expense not found"})
+    }
 
-//     if err := db.Delete(&expense).Error; err != nil {
-//         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not delete expense"})
-//     }
+    // Hapus expense
+    if err := db.Delete(&expense).Error; err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not delete expense"})
+    }
 
-//     return c.JSON(fiber.Map{"message": "Expense deleted successfully"})
-// }
+    return c.JSON(fiber.Map{"message": "Expense deleted successfully"})
+}
