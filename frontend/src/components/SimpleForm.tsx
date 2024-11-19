@@ -1,107 +1,88 @@
 "use client";
 
-import { FC, useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
-interface SimpleFormProps {
-  endpoint: string;
-  token: string;
-  data: any; // Data yang diedit
-  onSubmitSuccess: () => void; // Callback untuk sukses submit
+interface FormField {
+    name: string;
+    label: string;
+    type: 'text' | 'password' | 'select' | 'email';
+    defaultValue?: string;
+    options?: string[]; // Options for select fields
 }
 
-const SimpleForm: FC<SimpleFormProps> = ({ endpoint, token, data, onSubmitSuccess }) => {
-  const [formData, setFormData] = useState(data);
+interface SimpleFormProps {
+    fields: FormField[];
+    onSubmit: (formData: { [key: string]: any }) => void;
+}
 
-  useEffect(() => {
-    setFormData(data);
-  }, [data]);
+const SimpleForm: React.FC<SimpleFormProps> = ({ fields, onSubmit }) => {
+    const [formData, setFormData] = useState<{ [key: string]: any }>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData: any) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+    useEffect(() => {
+        // Initialize form data with default values if provided
+        const initialData: { [key: string]: any } = {};
+        fields.forEach(field => {
+            initialData[field.name] = field.defaultValue || '';
+        });
+        setFormData(initialData);
+    }, [fields]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value,
+        });
+    };
 
-    try {
-      const response = await fetch(`${endpoint}/${formData.id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(formData);
+        setFormData({}); // Reset form data
+    };
 
-      if (!response.ok) {
-        throw new Error("Error updating product");
-      }
+    return (
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+            {fields.map((field, index) => (
+                <div key={index} className="mb-4">
+                    <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-2">
+                        {field.label}
+                    </label>
 
-      onSubmitSuccess(); // Callback sukses
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium">Product Name</label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          value={formData.name}
-          onChange={handleChange}
-          className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="price" className="block text-sm font-medium">Price</label>
-        <input
-          id="price"
-          name="price"
-          type="number"
-          value={formData.price}
-          onChange={handleChange}
-          className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="category" className="block text-sm font-medium">Category</label>
-        <input
-          id="category"
-          name="category"
-          type="text"
-          value={formData.category}
-          onChange={handleChange}
-          className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-          required
-        />
-      </div>
-      <div className="flex justify-between mt-4">
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-md"
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          className="bg-gray-500 text-white px-4 py-2 rounded-md"
-          onClick={() => setFormData(data)} // Reset form to initial data
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-  );
+                    {/* Conditional rendering for different field types */}
+                    {field.type === 'select' ? (
+                        <select
+                            name={field.name}
+                            id={field.name}
+                            value={formData[field.name] || ''}
+                            onChange={handleChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-black"
+                        >
+                            {field.options && field.options.map((option, optIndex) => (
+                                <option key={optIndex} value={option}>
+                                    {option}
+                                </option>
+                            ))}
+                        </select>
+                    ) : (
+                        <input
+                            type={field.type}
+                            name={field.name}
+                            id={field.name}
+                            value={formData[field.name] || ''}
+                            onChange={handleChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-black"
+                        />
+                    )}
+                </div>
+            ))}
+            <button
+                type="submit"
+                className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+                Submit
+            </button>
+        </form>
+    );
 };
 
 export default SimpleForm;
