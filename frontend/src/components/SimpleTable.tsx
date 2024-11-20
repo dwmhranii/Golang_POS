@@ -1,86 +1,72 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import React from 'react';
 
 interface SimpleTableProps {
-  endpoint: string; // Endpoint API
-  columns: string[]; // Nama kolom
-  token: string; // JWT token untuk autentikasi
+    endpoint: string;
+    data: any[];
+    onEdit: (item: any) => void;
+    onDelete: (id: number, token: string | null) => void;  // Updated to include token
+    onView: (item: any) => void;
+    token: string | null;  // New prop to handle JWT token
 }
 
-const SimpleTable: FC<SimpleTableProps> = ({ endpoint, columns, token }) => {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+const SimpleTable: React.FC<SimpleTableProps> = ({ data, onEdit, onDelete, onView, token }) => {
+    // Get the keys from the first data object to create table headers
+    const headers = data.length > 0 ? Object.keys(data[0]) : [];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(endpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Menyertakan JWT di header
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        setData(result);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [endpoint, token]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full table-auto border-collapse border border-gray-300">
-        <thead>
-          <tr>
-            {columns.map((column, index) => (
-              <th
-                key={index}
-                className="border border-gray-300 px-4 py-2 bg-gray-100 text-left font-medium"
-              >
-                {column}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, rowIndex) => (
-            <tr key={rowIndex} className="odd:bg-white even:bg-gray-50">
-              {columns.map((column, colIndex) => (
-                <td
-                  key={colIndex}
-                  className="border border-gray-300 px-4 py-2 text-sm"
-                >
-                  {row[column] || "-"}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+    return (
+        <div className="overflow-x-auto shadow-lg rounded-lg">
+            <table className="w-full text-left border-collapse bg-white rounded-lg">
+                <thead>
+                    <tr className="bg-gray-100">
+                        {headers.map((header) => (
+                            <th 
+                                key={header} 
+                                className="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200"
+                            >
+                                {header.replace('_', ' ')}
+                            </th>
+                        ))}
+                        <th className="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                    {data.map((item) => (
+                        <tr key={item.id} className="hover:bg-gray-50">
+                            {headers.map((header) => (
+                                <td key={header} className="p-4 text-sm text-gray-900">
+                                    {item[header]}
+                                </td>
+                            ))}
+                            <td className=" p-4 text-sm font-medium">
+                                <button 
+                                    className="bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700 mr-2"
+                                    onClick={() => onView(item)}
+                                >
+                                    View
+                                </button>
+                                <button 
+                                    className="bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700 mr-2"
+                                    onClick={() => onEdit(item)}
+                                >
+                                    Edit
+                                </button>
+                                <button 
+                                    className="bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700"
+                                    onClick={() => onDelete(item.id, token)}  // Pass the token here
+                                >
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
 };
 
 export default SimpleTable;
