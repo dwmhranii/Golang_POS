@@ -1,83 +1,83 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import SimpleForm from '@/src/component/SimpleForm';
-import SidebarLayout from '@/src/component/sidebarLayout';
-import Breadcrumbs from '@/src/component/Breadcrumbs';
+import Breadcrumbs from "@/src/component/Breadcrumbs";
+import SidebarLayout from "@/src/component/sidebarLayout";
+import SimpleForm from "@/src/component/SimpleForm";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-const UserFormPage: React.FC = () => {
-    const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'admin' });
-    const [isEditMode, setIsEditMode] = useState(false);
+const PurchaseForm: React.FC = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const idUser = searchParams.get('id');
-    const token = localStorage.getItem('token');
+    const purchaseId = searchParams.get("purchase_id");
+    const token = localStorage.getItem("token");
+    const [fields, setFields] = useState<any[]>([]);
 
     useEffect(() => {
         if (!token) {
-            router.push('/'); // Redirect to login if no token is found
+            router.push("/");
             return;
         }
 
-        if (idUser) {
-            fetch(`http://localhost:3010/api/users/${idUser}`, {
-                headers: { 'Authorization': `Bearer ${token}` },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    setFormData({name: data.name, email: data.email, password: '', role: data.role });
-                    setIsEditMode(true);
-                })
-                .catch(error => console.error('Error fetching user data:', error));
-        }
-    }, [idUser, token, router]);
+        // Fetch fields dynamically based on edit or create
+        const fetchPurchase = async () => {
+            if (purchaseId) {
+                const response = await fetch(
+                    `http://localhost:3010/api/purchases/${purchaseId}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const data = await response.json();
 
-    const handleFormSubmit = (formData: { [key: string]: any }) => {
-        const method = isEditMode ? 'PUT' : 'POST';
-        const url = isEditMode ? `http://localhost:3010/api/users/${idUser}` : 'http://localhost:3010/api/users';
-    
-        // Ensure to send all form data, even if it's unchanged.
-        const payload = {
-            user_id: formData.user_id, // Assuming user_id is passed for update
-            name: formData.name || '',  // Ensure values are not undefined or null
-            email: formData.email || '',
-            role: formData.role || '',
-            ...(formData.password ? { password: formData.password } : {}), // Send password only if it's changed
+                setFields([
+                    { name: "purchase_code", label: "Purchase Code", type: "text", defaultValue: data.purchase_code },
+                    { name: "product_id", label: "Product ID", type: "number", defaultValue: data.product_id },
+                    { name: "quantity", label: "Quantity", type: "number", defaultValue: data.quantity },
+                    { name: "cost_price", label: "Cost Price", type: "number", defaultValue: data.cost_price },
+                    { name: "total_cost", label: "Total Cost", type: "number", defaultValue: data.total_cost },
+                    { name: "date", label: "Date", type: "date", defaultValue: data.date.split("T")[0] },
+                ]);
+            } else {
+                setFields([
+                    { name: "purchase_code", label: "Purchase Code", type: "text" },
+                    { name: "product_id", label: "Product ID", type: "number" },
+                    { name: "quantity", label: "Quantity", type: "number" },
+                    { name: "cost_price", label: "Cost Price", type: "number" },
+                    { name: "total_cost", label: "Total Cost", type: "number" },
+                    { name: "date", label: "Date", type: "date" },
+                ]);
+            }
         };
-    
-        fetch(url, {
-            method: method,
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
+
+        fetchPurchase();
+    }, [purchaseId, token, router]);
+
+    const handleSubmit = async (formData: any) => {
+        const method = purchaseId ? "PUT" : "POST";
+        const url = purchaseId
+            ? `http://localhost:3010/api/purchases/${purchaseId}`
+            : "http://localhost:3010/api/purchases";
+
+        await fetch(url, {
+            method,
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(payload),
-        })
-        .then(() => router.push('/users'))
-        .catch(error => console.error('Error submitting form:', error));
+            body: JSON.stringify(formData),
+        });
+
+        router.push("/purchases");
     };
-    
 
     return (
         <SidebarLayout>
             <Breadcrumbs />
-            <div className="user-form-page">
-        <div className="form-container p-6">
-            <h2 className="text-2xl font-bold mb-4">{isEditMode ? 'Edit User' : 'Create New User'}</h2>
-            <SimpleForm
-                fields={[
-                    { name: "name", label: "Name", type: "text", defaultValue: formData.name },
-                    { name: "email", label: "Email", type: "email", defaultValue: formData.email },
-                    { name: "password", label: "Password", type: "password", defaultValue: formData.password},
-                    { name: "role", label: "Role", type: "select", options: ["admin", "cashier"], defaultValue: formData.role},
-                ]}
-                onSubmit={handleFormSubmit}
-            />
+            <div className="p-6">
+            <SimpleForm fields={fields} onSubmit={handleSubmit} />
         </div>
-    </div></SidebarLayout>
+        </SidebarLayout>
         
     );
 };
 
-export default UserFormPage;
+export default PurchaseForm;

@@ -11,10 +11,10 @@ type SidebarLayoutProps = {
 const MENU_ITEMS = [
   { name: "Dashboard", icon: "📊", href: "/dashboard" },
   { name: "Category", icon: "🏷️", href: "/categories" },
-  { name: "Expanse", icon: "💰", href: "/expanses" },
+  { name: "Expense", icon: "💰", href: "/expenses" },
   { name: "Purchase", icon: "🛒", href: "/purchases" },
   { name: "Product", icon: "🔧", href: "/products" },
-  { name: "Transaction", icon: "💳", href: "/transactions" },
+  { name: "Sale", icon: "💳", href: "/sales" },
   { name: "User", icon: "👤", href: "/users" },
 ];
 
@@ -67,7 +67,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className={`flex h-screen ${theme === "dark" ? "bg-gray-800" : "bg-gray-100"}`}>
+    <div className={`flex h-screen max-w-screen ${theme === "dark" ? "bg-gray-800" : "bg-gray-100"}`}>
       {/* Sidebar */}
       <div
         className={`${

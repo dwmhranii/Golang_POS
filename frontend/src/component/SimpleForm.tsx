@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 interface FormField {
     name: string;
     label: string;
-    type: 'text' | 'password' | 'select' | 'email' | 'number';
+    type: 'text' | 'password' | 'select' | 'email' | 'number' | 'date';
     defaultValue?: string | number;
     options?: { label: string; value: string }[]; // Options for select fields
 }
@@ -36,8 +36,35 @@ const SimpleForm: React.FC<SimpleFormProps> = ({ fields, onSubmit }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
-        setFormData({}); // Reset form data
+    
+        // Konversi data form sesuai tipe yang diinginkan
+        const convertedData = { ...formData };
+    
+        // Pastikan amount menjadi number (float atau int)
+        if (convertedData.amount) {
+            convertedData.amount = parseFloat(convertedData.amount); // Bisa juga menggunakan parseInt() jika integer
+        }
+    
+        // Pastikan date menjadi objek Date atau string format yang sesuai
+        if (convertedData.date) {
+            convertedData.date = new Date(convertedData.date); // Bisa juga gunakan format khusus jika dibutuhkan
+        }
+    
+        // Panggil onSubmit dengan data yang sudah dikonversi
+        onSubmit(convertedData);
+    
+        // Reset form data
+        setFormData({});
+    };
+    
+
+    const formatDate = (date: string) => {
+        // Format the date to a readable string (e.g., 'YYYY-MM-DD')
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = ('0' + (d.getMonth() + 1)).slice(-2); // Ensure 2-digit month
+        const day = ('0' + d.getDate()).slice(-2); // Ensure 2-digit day
+        return `${year}-${month}-${day}`;
     };
 
     return (
@@ -64,6 +91,15 @@ const SimpleForm: React.FC<SimpleFormProps> = ({ fields, onSubmit }) => {
                 </option>
             ))}
                         </select>
+                    ) : field.type === 'date' ? (
+                        <input
+                            type="date"
+                            name={field.name}
+                            id={field.name}
+                            value={formatDate(formData[field.name] || '')} // Format date
+                            onChange={handleChange}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-black"
+                        />
                     ) : (
                         <input
                             type={field.type}

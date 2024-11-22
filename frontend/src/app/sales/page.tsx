@@ -6,7 +6,7 @@ import SimpleTable from "@/src/component/SimpleTable";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const PurchasesPage: React.FC = () => {
+const SalesPage: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
     const router = useRouter();
     const token = localStorage.getItem("token");
@@ -17,7 +17,7 @@ const PurchasesPage: React.FC = () => {
             return;
         }
 
-        fetch("http://localhost:3010/api/purchases", {
+        fetch("http://localhost:3010/api/sales", {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then((response) => {
@@ -33,21 +33,21 @@ const PurchasesPage: React.FC = () => {
             });
     }, [token, router]);
 
-    const handleDelete = (purchase_id: number) => {
-        fetch(`http://localhost:3010/api/purchases/${purchase_id}`, {
+    const handleDelete = (sale_id: number) => {
+        fetch(`http://localhost:3010/api/sales/${sale_id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
         })
-            .then(() => setData(data.filter((item) => item.purchase_id !== purchase_id)))
+            .then(() => setData(data.filter((item) => item.sale_id !== sale_id)))
             .catch((error) => console.error(error));
     };
 
     const handleEdit = (item: any) => {
-        router.push(`/purchases/form?purchase_id=${item.purchase_id}`);
+        router.push(`/sales/form?sale_id=${item.sale_id}`);
     };
 
     const handleView = (item: any) => {
-        router.push(`/purchases/view?purchase_id=${item.purchase_id}`);
+        router.push(`/sales/view?sale_id=${item.sale_id}`);
     };
 
     return (
@@ -57,23 +57,23 @@ const PurchasesPage: React.FC = () => {
                 <div className="flex justify-end mb-4">
                     <button
                         className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-700"
-                        onClick={() => router.push("/purchases/form")}
+                        onClick={() => router.push("/sales/form")}
                     >
                         Create
                     </button>
                 </div>
                 <SimpleTable
-                    endpoint="api/purchases"
+                    endpoint="api/sales"
                     data={data}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onView={handleView}
                     token={token}
-                    keyField="purchase_id"
+                    keyField="sale_id"
                 />
             </div>
         </SidebarLayout>
     );
 };
 
-export default PurchasesPage;
+export default SalesPage;

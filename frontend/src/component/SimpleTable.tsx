@@ -17,7 +17,7 @@ const SimpleTable: React.FC<SimpleTableProps> = ({ data, onEdit, onDelete, onVie
     const headers = data.length > 0 ? Object.keys(data[0]) : [];
 
     return (
-        <div className="overflow-x-auto shadow-lg rounded-lg">
+        <div className="overflow-x-auto shadow-lg rounded-lg w-2/3">
             <table className="w-full text-left border-collapse bg-white rounded-lg">
                 <thead>
                     <tr className="bg-gray-100">

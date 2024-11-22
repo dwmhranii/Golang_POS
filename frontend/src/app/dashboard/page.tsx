@@ -1,7 +1,5 @@
 import Breadcrumbs from "@/src/component/Breadcrumbs";
-import MySidebar from "@/src/component/sidebar";
 import SidebarLayout from "@/src/component/sidebarLayout";
-import { DarkThemeToggle } from "flowbite-react";
 
 
 export default function Home() {

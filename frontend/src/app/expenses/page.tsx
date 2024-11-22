@@ -6,19 +6,19 @@ import SimpleTable from "@/src/component/SimpleTable";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const UserPage: React.FC = () => {
+const ExpensePage: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
     const router = useRouter();
     const token = localStorage.getItem("token"); // Retrieve token from localStorage
 
-    // Fetch all users
+    // Fetch all expenses
     useEffect(() => {
         if (!token) {
             router.push("/"); // Redirect to login if no token is found
             return;
         }
 
-        fetch("http://localhost:3010/api/expense", {
+        fetch("http://localhost:3010/api/expenses", {
             headers: { Authorization: `Bearer ${token}` }, // Include JWT token in headers
         })
             .then((response) => {
@@ -36,45 +36,44 @@ const UserPage: React.FC = () => {
             });
     }, [token, router]);
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (expense_id: number) => {
         // Send a DELETE request to the backend
-        fetch(`http://localhost:3010/api/expense/${id}`, {
+        fetch(`http://localhost:3010/api/expenses/${expense_id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` }, // Include JWT token
         })
             .then(() => {
-                setData(data.filter((item) => item.id !== id)); // Remove deleted user from the state
+                setData(data.filter((item) => item.expense_id !== expense_id)); // Remove deleted expense from the state
             })
             .catch((error) => console.error("Error deleting item:", error));
     };
 
     const handleEdit = (item: any) => {
-        // Navigate to the edit form with the user's ID
-        router.push(`/expense/form?expense_id=${item.expense_id}`);
+        // Navigate to the edit form with the expense's ID
+        router.push(`/expenses/form?expense_id=${item.expense_id}`);
     };
 
     const handleView = (item: any) => {
-        // Navigate to the user view page with the user's ID
-        router.push(`/expense/view?expense_id=${item.expense_id}`);
+        // Navigate to the expense view page with the expense's ID
+        router.push(`/expenses/view?expense_id=${item.expense_id}`);
     };
 
     return (
         <SidebarLayout>
-            <Breadcrumbs/>
-            {/* Container for the button and table */}
+            <Breadcrumbs />
             <div className="p-6">
                 {/* Create Button */}
                 <div className="flex justify-end mb-4">
                     <button
                         className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-700 mr-2"
-                        onClick={() => router.push("/expense/form")}
+                        onClick={() => router.push("/expenses/form")}
                     >
                         Create
                     </button>
                 </div>
                 {/* Table */}
                 <SimpleTable
-                    endpoint="api/expense"
+                    endpoint="api/expenses"
                     data={data}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
@@ -87,4 +86,4 @@ const UserPage: React.FC = () => {
     );
 };
 
-export default UserPage;
+export default ExpensePage;

@@ -1,12 +1,11 @@
 "use client";
 
-import React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation'; 
-import SimpleView from '@/src/component/SimpleView';
-import SidebarLayout from '@/src/component/sidebarLayout';
-import Breadcrumbs from '@/src/component/Breadcrumbs';
+import Breadcrumbs from "@/src/component/Breadcrumbs";
+import SidebarLayout from "@/src/component/sidebarLayout";
+import SimpleView from "@/src/component/SimpleView";
+import { useRouter, useSearchParams } from "next/navigation";
 
-const UserViewPage: React.FC = () => {
+const ExpenseView: React.FC = () => {
     const searchParams = useSearchParams();
     const idExpense = searchParams.get('expense_id');
     const token = localStorage.getItem('token');
@@ -22,14 +21,13 @@ const UserViewPage: React.FC = () => {
             <div className="dashboard-content flex">
             <div className="main-content flex-1 p-6">
                 <SimpleView 
-                    endpoint={`api/users/${idExpense}`} 
+                    endpoint={`api/expenses/${idExpense}`} 
                     token={token}
                 />
             </div>
         </div>
     </div></SidebarLayout>
-        
-    );
+    )
 };
 
-export default UserViewPage;
+export default ExpenseView;

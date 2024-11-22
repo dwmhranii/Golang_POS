@@ -6,23 +6,23 @@ import SimpleView from '@/src/component/SimpleView';
 import SidebarLayout from '@/src/component/sidebarLayout';
 import Breadcrumbs from '@/src/component/Breadcrumbs';
 
-const PurchaseViewPage: React.FC = () => {
+const SalesDetailPage: React.FC = () => {
     const searchParams = useSearchParams();
-    const idPurchase = searchParams.get('purchase_id');
+    const idSale = searchParams.get('sale_id');
     const token = localStorage.getItem('token');
 
-    if (!idPurchase || !token) {
+    if (!idSale || !token) {
         return <div>Invalid User ID or Missing Token</div>;
     }
 
     return (
         <SidebarLayout>
             <Breadcrumbs />
-            <div className="purchase-view-page">
+            <div className="category-view-page">
             <div className="dashboard-content flex">
             <div className="main-content flex-1 p-6">
                 <SimpleView 
-                    endpoint={`api/purchases/${idPurchase}`} 
+                    endpoint={`api/sales/${idSale}`} 
                     token={token}
                 />
             </div>
@@ -32,4 +32,4 @@ const PurchaseViewPage: React.FC = () => {
     );
 };
 
-export default PurchaseViewPage;
+export default SalesDetailPage;
