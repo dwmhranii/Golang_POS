@@ -70,7 +70,7 @@ const UserFormPage: React.FC = () => {
                     { name: "name", label: "Name", type: "text", defaultValue: formData.name },
                     { name: "email", label: "Email", type: "email", defaultValue: formData.email },
                     { name: "password", label: "Password", type: "password", defaultValue: formData.password},
-                    { name: "role", label: "Role", type: "select", options: [{ label: "Admin", value: "admin" }, { label: "Cashier", value: "cashier" }], defaultValue: formData.role }
+                    { name: "role", label: "Role", type: "select", options: ["admin", "cashier"], defaultValue: formData.role},
                 ]}
                 onSubmit={handleFormSubmit}
             />

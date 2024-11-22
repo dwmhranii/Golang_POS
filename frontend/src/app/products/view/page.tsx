@@ -8,10 +8,10 @@ import Breadcrumbs from '@/src/component/Breadcrumbs';
 
 const UserViewPage: React.FC = () => {
     const searchParams = useSearchParams();
-    const idUser = searchParams.get('id');
+    const idProduct = searchParams.get('product_id');
     const token = localStorage.getItem('token');
 
-    if (!idUser || !token) {
+    if (!idProduct || !token) {
         return <div>Invalid User ID or Missing Token</div>;
     }
 
@@ -22,7 +22,7 @@ const UserViewPage: React.FC = () => {
             <div className="dashboard-content flex">
             <div className="main-content flex-1 p-6">
                 <SimpleView 
-                    endpoint={`api/users/${idUser}`} 
+                    endpoint={`api/products/${idProduct}`} 
                     token={token}
                 />
             </div>

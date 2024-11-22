@@ -11,7 +11,7 @@ const UserFormPage: React.FC = () => {
     const [isEditMode, setIsEditMode] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
-    const idUser = searchParams.get('id');
+    const idExpense = searchParams.get('expense_id');
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -20,8 +20,8 @@ const UserFormPage: React.FC = () => {
             return;
         }
 
-        if (idUser) {
-            fetch(`http://localhost:3010/api/users/${idUser}`, {
+        if (idExpense) {
+            fetch(`http://localhost:3010/api/expense/${idExpense}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
             })
                 .then(response => response.json())
@@ -31,11 +31,11 @@ const UserFormPage: React.FC = () => {
                 })
                 .catch(error => console.error('Error fetching user data:', error));
         }
-    }, [idUser, token, router]);
+    }, [idExpense, token, router]);
 
     const handleFormSubmit = (formData: { [key: string]: any }) => {
         const method = isEditMode ? 'PUT' : 'POST';
-        const url = isEditMode ? `http://localhost:3010/api/users/${idUser}` : 'http://localhost:3010/api/users';
+        const url = isEditMode ? `http://localhost:3010/api/expense/${idExpense}` : 'http://localhost:3010/api/expense';
     
         // Ensure to send all form data, even if it's unchanged.
         const payload = {
@@ -70,7 +70,7 @@ const UserFormPage: React.FC = () => {
                     { name: "name", label: "Name", type: "text", defaultValue: formData.name },
                     { name: "email", label: "Email", type: "email", defaultValue: formData.email },
                     { name: "password", label: "Password", type: "password", defaultValue: formData.password},
-                    { name: "role", label: "Role", type: "select", options: [{ label: "Admin", value: "admin" }, { label: "Cashier", value: "cashier" }], defaultValue: formData.role }
+                    { name: "role", label: "Role", type: "select", options: ["admin", "cashier"], defaultValue: formData.role},
                 ]}
                 onSubmit={handleFormSubmit}
             />

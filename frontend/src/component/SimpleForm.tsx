@@ -5,9 +5,9 @@ import React, { useState, useEffect } from 'react';
 interface FormField {
     name: string;
     label: string;
-    type: 'text' | 'password' | 'select' | 'email';
-    defaultValue?: string;
-    options?: string[]; // Options for select fields
+    type: 'text' | 'password' | 'select' | 'email' | 'number';
+    defaultValue?: string | number;
+    options?: { label: string; value: string }[]; // Options for select fields
 }
 
 interface SimpleFormProps {
@@ -57,11 +57,12 @@ const SimpleForm: React.FC<SimpleFormProps> = ({ fields, onSubmit }) => {
                             onChange={handleChange}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm text-black"
                         >
-                            {field.options && field.options.map((option, optIndex) => (
-                                <option key={optIndex} value={option}>
-                                    {option}
-                                </option>
-                            ))}
+                            {field.options &&
+            field.options.map((option, optIndex) => (
+                <option key={optIndex} value={option.value}>
+                    {option.label}
+                </option>
+            ))}
                         </select>
                     ) : (
                         <input
@@ -77,7 +78,7 @@ const SimpleForm: React.FC<SimpleFormProps> = ({ fields, onSubmit }) => {
             ))}
             <button
                 type="submit"
-                className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="w-full py-2 px-4 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition"
             >
                 Submit
             </button>

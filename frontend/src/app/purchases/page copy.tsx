@@ -80,7 +80,6 @@ const UserPage: React.FC = () => {
                     onDelete={handleDelete}
                     onView={handleView}
                     token={token}
-                    keyField="id"
                 />
             </div>
         </SidebarLayout>

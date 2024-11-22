@@ -6,13 +6,14 @@ interface SimpleTableProps {
     endpoint: string;
     data: any[];
     onEdit: (item: any) => void;
-    onDelete: (id: number, token: string | null) => void;  // Updated to include token
+    onDelete: (id: number, token: string | null) => void;
     onView: (item: any) => void;
-    token: string | null;  // New prop to handle JWT token
+    token: string | null;
+    keyField: string; // New prop for the identifier field (e.g., "id", "category_id", "product_id")
 }
 
-const SimpleTable: React.FC<SimpleTableProps> = ({ data, onEdit, onDelete, onView, token }) => {
-    // Get the keys from the first data object to create table headers
+const SimpleTable: React.FC<SimpleTableProps> = ({ data, onEdit, onDelete, onView, token, keyField }) => {
+    // Get headers based on the keys of the first item in the data
     const headers = data.length > 0 ? Object.keys(data[0]) : [];
 
     return (
@@ -35,13 +36,14 @@ const SimpleTable: React.FC<SimpleTableProps> = ({ data, onEdit, onDelete, onVie
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                     {data.map((item) => (
-                        <tr key={item.id} className="hover:bg-gray-50">
+                        <tr key={item[keyField]} className="hover:bg-gray-50"> {/* Use the keyField here */}
                             {headers.map((header) => (
                                 <td key={header} className="p-4 text-sm text-gray-900">
-                                    {item[header]}
+                                    {/* Check if the header is 'category_name' and display the category name */}
+                                    {header === "category_name" ? item.category_name : item[header]}
                                 </td>
                             ))}
-                            <td className=" p-4 text-sm font-medium">
+                            <td className="p-4 text-sm font-medium">
                                 <button 
                                     className="bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700 mr-2"
                                     onClick={() => onView(item)}
@@ -56,7 +58,7 @@ const SimpleTable: React.FC<SimpleTableProps> = ({ data, onEdit, onDelete, onVie
                                 </button>
                                 <button 
                                     className="bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700"
-                                    onClick={() => onDelete(item.id, token)}  // Pass the token here
+                                    onClick={() => onDelete(item[keyField], token)} // Pass the correct keyField here
                                 >
                                     Delete
                                 </button>

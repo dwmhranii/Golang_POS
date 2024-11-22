@@ -18,7 +18,7 @@ const UserPage: React.FC = () => {
             return;
         }
 
-        fetch("http://localhost:3010/api/users", {
+        fetch("http://localhost:3010/api/expense", {
             headers: { Authorization: `Bearer ${token}` }, // Include JWT token in headers
         })
             .then((response) => {
@@ -38,7 +38,7 @@ const UserPage: React.FC = () => {
 
     const handleDelete = (id: number) => {
         // Send a DELETE request to the backend
-        fetch(`http://localhost:3010/api/users/${id}`, {
+        fetch(`http://localhost:3010/api/expense/${id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` }, // Include JWT token
         })
@@ -50,12 +50,12 @@ const UserPage: React.FC = () => {
 
     const handleEdit = (item: any) => {
         // Navigate to the edit form with the user's ID
-        router.push(`/users/form?id=${item.id}`);
+        router.push(`/expense/form?expense_id=${item.expense_id}`);
     };
 
     const handleView = (item: any) => {
         // Navigate to the user view page with the user's ID
-        router.push(`/users/view?id=${item.id}`);
+        router.push(`/expense/view?expense_id=${item.expense_id}`);
     };
 
     return (
@@ -67,20 +67,20 @@ const UserPage: React.FC = () => {
                 <div className="flex justify-end mb-4">
                     <button
                         className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-700 mr-2"
-                        onClick={() => router.push("/users/form")}
+                        onClick={() => router.push("/expense/form")}
                     >
                         Create
                     </button>
                 </div>
                 {/* Table */}
                 <SimpleTable
-                    endpoint="api/users"
+                    endpoint="api/expense"
                     data={data}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onView={handleView}
                     token={token}
-                    keyField="id"
+                    keyField="expense_id"
                 />
             </div>
         </SidebarLayout>
