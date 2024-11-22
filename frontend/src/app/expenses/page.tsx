@@ -8,18 +8,20 @@ import { useEffect, useState } from "react";
 
 const ExpensePage: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
+    const [token, setToken] = useState<string | null>(null); // Token state
     const router = useRouter();
-    const token = localStorage.getItem("token"); // Retrieve token from localStorage
 
-    // Fetch all expenses
+    // Fetch token and expenses
     useEffect(() => {
-        if (!token) {
+        const storedToken = localStorage.getItem("token"); // Access localStorage only in useEffect
+        if (!storedToken) {
             router.push("/"); // Redirect to login if no token is found
             return;
         }
+        setToken(storedToken);
 
         fetch("http://localhost:3010/api/expenses", {
-            headers: { Authorization: `Bearer ${token}` }, // Include JWT token in headers
+            headers: { Authorization: `Bearer ${storedToken}` }, // Include JWT token in headers
         })
             .then((response) => {
                 if (!response.ok) {
@@ -34,10 +36,10 @@ const ExpensePage: React.FC = () => {
                     router.push("/"); // Redirect to login on unauthorized error
                 }
             });
-    }, [token, router]);
+    }, [router]);
 
     const handleDelete = (expense_id: number) => {
-        // Send a DELETE request to the backend
+        if (!token) return; // Ensure token is available
         fetch(`http://localhost:3010/api/expenses/${expense_id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` }, // Include JWT token
@@ -49,12 +51,10 @@ const ExpensePage: React.FC = () => {
     };
 
     const handleEdit = (item: any) => {
-        // Navigate to the edit form with the expense's ID
         router.push(`/expenses/form?expense_id=${item.expense_id}`);
     };
 
     const handleView = (item: any) => {
-        // Navigate to the expense view page with the expense's ID
         router.push(`/expenses/view?expense_id=${item.expense_id}`);
     };
 
@@ -62,7 +62,6 @@ const ExpensePage: React.FC = () => {
         <SidebarLayout>
             <Breadcrumbs />
             <div className="p-6">
-                {/* Create Button */}
                 <div className="flex justify-end mb-4">
                     <button
                         className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-700 mr-2"
@@ -71,7 +70,6 @@ const ExpensePage: React.FC = () => {
                         Create
                     </button>
                 </div>
-                {/* Table */}
                 <SimpleTable
                     endpoint="api/expenses"
                     data={data}

@@ -27,15 +27,22 @@ const ProductPage: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [displayData, setDisplayData] = useState<any[]>([]);
+    const [token, setToken] = useState<string | null>(null);
     const router = useRouter();
-    const token = localStorage.getItem("token");
+
+    // Fetch token from localStorage on client-side
+    useEffect(() => {
+        const storedToken = localStorage.getItem("token");
+        if (!storedToken) {
+            router.push("/"); // Redirect to login if no token found
+            return;
+        }
+        setToken(storedToken);
+    }, [router]);
 
     // Fetch categories
     useEffect(() => {
-        if (!token) {
-            router.push("/");
-            return;
-        }
+        if (!token) return;
 
         fetch("http://localhost:3010/api/categories", {
             headers: { Authorization: `Bearer ${token}` },
@@ -53,10 +60,7 @@ const ProductPage: React.FC = () => {
 
     // Fetch products
     useEffect(() => {
-        if (!token) {
-            router.push("/");
-            return;
-        }
+        if (!token) return;
 
         fetch("http://localhost:3010/api/products", {
             headers: { Authorization: `Bearer ${token}` },
@@ -75,15 +79,18 @@ const ProductPage: React.FC = () => {
     // Combine products with category names
     useEffect(() => {
         if (products.length && categories.length) {
-            const mappedData = products.map(product => ({
+            const mappedData = products.map((product) => ({
                 ...product,
-                category_id: categories.find(cat => cat.category_id === product.category_id)?.name || product.category_id
+                category_id:
+                    categories.find((cat) => cat.category_id === product.category_id)?.name || product.category_id,
             }));
             setDisplayData(mappedData);
         }
     }, [products, categories]);
 
     const handleDelete = (id: number) => {
+        if (!token) return;
+
         fetch(`http://localhost:3010/api/products/${id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
@@ -95,11 +102,11 @@ const ProductPage: React.FC = () => {
             .catch((error) => console.error("Error deleting item:", error));
     };
 
-    const handleEdit = (item: any) => {
+    const handleEdit = (item: Product) => {
         router.push(`/products/form?product_id=${item.product_id}`);
     };
 
-    const handleView = (item: any) => {
+    const handleView = (item: Product) => {
         router.push(`/products/view?product_id=${item.product_id}`);
     };
 

@@ -8,14 +8,22 @@ import { useEffect, useState } from "react";
 
 const PurchasesPage: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
+    const [token, setToken] = useState<string | null>(null);
     const router = useRouter();
-    const token = localStorage.getItem("token");
 
+    // Fetch token from localStorage
     useEffect(() => {
-        if (!token) {
-            router.push("/");
+        const storedToken = localStorage.getItem("token");
+        if (!storedToken) {
+            router.push("/"); // Redirect to login if no token is found
             return;
         }
+        setToken(storedToken);
+    }, [router]);
+
+    // Fetch purchase data
+    useEffect(() => {
+        if (!token) return;
 
         fetch("http://localhost:3010/api/purchases", {
             headers: { Authorization: `Bearer ${token}` },
@@ -26,20 +34,22 @@ const PurchasesPage: React.FC = () => {
             })
             .then((data) => setData(data))
             .catch((error) => {
-                console.error(error);
+                console.error("Error fetching purchases:", error);
                 if (error.message === "Unauthorized") {
-                    router.push("/");
+                    router.push("/"); // Redirect to login on unauthorized error
                 }
             });
     }, [token, router]);
 
     const handleDelete = (purchase_id: number) => {
+        if (!token) return;
+
         fetch(`http://localhost:3010/api/purchases/${purchase_id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
         })
             .then(() => setData(data.filter((item) => item.purchase_id !== purchase_id)))
-            .catch((error) => console.error(error));
+            .catch((error) => console.error("Error deleting purchase:", error));
     };
 
     const handleEdit = (item: any) => {

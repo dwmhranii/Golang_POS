@@ -8,18 +8,25 @@ import { useEffect, useState } from "react";
 
 const UserPage: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
+    const [token, setToken] = useState<string | null>(null);
     const router = useRouter();
-    const token = localStorage.getItem("token"); // Retrieve token from localStorage
 
-    // Fetch all users
+    // Fetch token from localStorage
     useEffect(() => {
-        if (!token) {
+        const storedToken = localStorage.getItem("token");
+        if (!storedToken) {
             router.push("/"); // Redirect to login if no token is found
             return;
         }
+        setToken(storedToken);
+    }, [router]);
+
+    // Fetch all users
+    useEffect(() => {
+        if (!token) return;
 
         fetch("http://localhost:3010/api/users", {
-            headers: { Authorization: `Bearer ${token}` }, // Include JWT token in headers
+            headers: { Authorization: `Bearer ${token}` },
         })
             .then((response) => {
                 if (!response.ok) {
@@ -37,10 +44,11 @@ const UserPage: React.FC = () => {
     }, [token, router]);
 
     const handleDelete = (id: number) => {
-        // Send a DELETE request to the backend
+        if (!token) return;
+
         fetch(`http://localhost:3010/api/users/${id}`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` }, // Include JWT token
+            headers: { Authorization: `Bearer ${token}` },
         })
             .then(() => {
                 setData(data.filter((item) => item.id !== id)); // Remove deleted user from the state
@@ -49,19 +57,16 @@ const UserPage: React.FC = () => {
     };
 
     const handleEdit = (item: any) => {
-        // Navigate to the edit form with the user's ID
         router.push(`/users/form?id=${item.id}`);
     };
 
     const handleView = (item: any) => {
-        // Navigate to the user view page with the user's ID
         router.push(`/users/view?id=${item.id}`);
     };
 
     return (
         <SidebarLayout>
-            <Breadcrumbs/>
-            {/* Container for the button and table */}
+            <Breadcrumbs />
             <div className="p-6">
                 {/* Create Button */}
                 <div className="flex justify-end mb-4">

@@ -13,17 +13,17 @@ interface SimpleTableProps {
 }
 
 const SimpleTable: React.FC<SimpleTableProps> = ({ data, onEdit, onDelete, onView, token, keyField }) => {
-    // Get headers based on the keys of the first item in the data
-    const headers = data.length > 0 ? Object.keys(data[0]) : [];
+    const safeData = Array.isArray(data) ? data : [];
+    const headers = safeData.length > 0 ? Object.keys(safeData[0]) : [];
 
     return (
         <div className="overflow-x-auto shadow-lg rounded-lg w-2/3">
             <table className="w-full text-left border-collapse bg-white rounded-lg">
                 <thead>
                     <tr className="bg-gray-100">
-                        {headers.map((header) => (
-                            <th 
-                                key={header} 
+                        {headers.map((header, index) => (
+                            <th
+                                key={`${header}-${index}`} // Ensure unique keys for headers
                                 className="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200"
                             >
                                 {header.replace('_', ' ')}
@@ -35,30 +35,29 @@ const SimpleTable: React.FC<SimpleTableProps> = ({ data, onEdit, onDelete, onVie
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                    {data.map((item) => (
-                        <tr key={item[keyField]} className="hover:bg-gray-50"> {/* Use the keyField here */}
-                            {headers.map((header) => (
-                                <td key={header} className="p-4 text-sm text-gray-900">
-                                    {/* Check if the header is 'category_name' and display the category name */}
+                    {safeData.map((item, index) => (
+                        <tr key={item[keyField] || `row-${index}`} className="hover:bg-gray-50">
+                            {headers.map((header, headerIndex) => (
+                                <td key={`${header}-${headerIndex}`} className="p-4 text-sm text-gray-900">
                                     {header === "category_name" ? item.category_name : item[header]}
                                 </td>
                             ))}
                             <td className="p-4 text-sm font-medium">
-                                <button 
+                                <button
                                     className="bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700 mr-2"
                                     onClick={() => onView(item)}
                                 >
                                     View
                                 </button>
-                                <button 
+                                <button
                                     className="bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700 mr-2"
                                     onClick={() => onEdit(item)}
                                 >
                                     Edit
                                 </button>
-                                <button 
+                                <button
                                     className="bg-gray-900 text-white px-2 py-1 rounded hover:bg-gray-700"
-                                    onClick={() => onDelete(item[keyField], token)} // Pass the correct keyField here
+                                    onClick={() => onDelete(item[keyField], token)}
                                 >
                                     Delete
                                 </button>
@@ -70,5 +69,6 @@ const SimpleTable: React.FC<SimpleTableProps> = ({ data, onEdit, onDelete, onVie
         </div>
     );
 };
+
 
 export default SimpleTable;
