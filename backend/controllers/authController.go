@@ -69,5 +69,5 @@ func LoginUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to generate token"})
 	}
 
-	return c.JSON(fiber.Map{"token": tokenString})
+	return c.JSON(fiber.Map{"token": tokenString, "role" : user.Role})
 }
