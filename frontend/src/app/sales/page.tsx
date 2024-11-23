@@ -1,87 +1,82 @@
 "use client";
 
-import Breadcrumbs from "@/src/component/Breadcrumbs";
-import SidebarLayout from "@/src/component/sidebarLayout";
-import SimpleTable from "@/src/component/SimpleTable";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import SimpleTable from "@/src/component/SimpleTable";
+import SidebarLayout from "@/src/component/sidebarLayout";
+import Breadcrumbs from "@/src/component/Breadcrumbs";
 
-const SalesPage: React.FC = () => {
-    const [data, setData] = useState<any[]>([]);
-    const [token, setToken] = useState<string | null>(null);
-    const router = useRouter();
+const TransactionPage = () => {
+  const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
+  const token = localStorage.getItem("token"); // JWT token untuk autentikasi
 
-    // Fetch token and sales data
-    useEffect(() => {
-        const storedToken = localStorage.getItem("token");
-        if (!storedToken) {
-            router.push("/"); // Redirect to login if no token is found
-            return;
-        }
+  const fetchTransactions = async () => {
+    try {
+      const res = await fetch("http://localhost:3010/api/sales", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await res.json();
+        console.log("Fetched Data:", result); // Log full result
+        setData(result.data || []);
+    } catch (error) {
+      console.error("Failed to fetch transactions:", error);
+    }
+  };
 
-        setToken(storedToken);
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
 
-        fetch("http://localhost:3010/api/sales", {
-            headers: { Authorization: `Bearer ${storedToken}` },
-        })
-            .then((response) => {
-                if (!response.ok) throw new Error("Unauthorized");
-                return response.json();
-            })
-            .then((data) => setData(data))
-            .catch((error) => {
-                console.error("Error fetching sales data:", error);
-                if (error.message === "Unauthorized") {
-                    router.push("/"); // Redirect to login on unauthorized error
-                }
-            });
-    }, [router]);
+  const handleView = (item: any) => {
+    router.push(`/sales/view?sale_id=${item.sale_id}`);
+  };
 
-    const handleDelete = (sale_id: number) => {
-        if (!token) return;
+  const handleEdit = (item: any) => {
+    router.push(`/sales/form?sale_id=${item.sale_id}`);
+  };
 
-        fetch(`http://localhost:3010/api/sales/${sale_id}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then(() => {
-                setData(data.filter((item) => item.sale_id !== sale_id));
-            })
-            .catch((error) => console.error("Error deleting sale:", error));
-    };
+  const handleDelete = async (id: number) => {
+    if (confirm("Are you sure you want to delete this transaction?")) {
+      try {
+        await fetch(`http://localhost:3010/api/sales/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        fetchTransactions();
+      } catch (error) {
+        console.error("Failed to delete transaction:", error);
+      }
+    }
+  };
 
-    const handleEdit = (item: any) => {
-        router.push(`/sales/form?sale_id=${item.sale_id}`);
-    };
+  console.log("Transaction Data:", data); // Add this line to log the data before passing to SimpleTable
 
-    const handleView = (item: any) => {
-        router.push(`/sales/view?sale_id=${item.sale_id}`);
-    };
+  return (
+    <SidebarLayout>
+      <Breadcrumbs />
+      <div>
+        <div className="flex justify-end mb-4">
+          <button
+            className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-700 mr-2"
+            onClick={() => router.push("/sales/form")}
+          >
+            Create Transaction
+          </button>
+        </div>
 
-    return (
-        <SidebarLayout>
-            <Breadcrumbs />
-            <div className="p-6">
-                <div className="flex justify-end mb-4">
-                    <button
-                        className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-700 mr-2"
-                        onClick={() => router.push("/sales/form")}
-                    >
-                        Create
-                    </button>
-                </div>
-                <SimpleTable
-                    endpoint="api/sales"
-                    data={data}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onView={handleView}
-                    token={token}
-                    keyField="sale_id"
-                />
-            </div>
-        </SidebarLayout>
-    );
+        <SimpleTable
+          data={data}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          token={token}
+          keyField="sale_id"
+          endpoint={"api/sales"}
+        />
+      </div>
+    </SidebarLayout>
+  );
 };
 
-export default SalesPage;
+export default TransactionPage;

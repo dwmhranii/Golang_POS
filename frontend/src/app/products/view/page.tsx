@@ -11,6 +11,8 @@ const UserViewPage: React.FC = () => {
     const idProduct = searchParams.get('product_id');
     const token = localStorage.getItem('token');
 
+    
+
     if (!idProduct || !token) {
         return <div>Invalid User ID or Missing Token</div>;
     }
