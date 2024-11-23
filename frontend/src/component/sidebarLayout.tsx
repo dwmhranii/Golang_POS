@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import dynamic from 'next/dynamic';
+
+const NoSSR = dynamic(() => import('./NoSSR'), { ssr: false });
 
 type SidebarLayoutProps = {
   children: React.ReactNode;
@@ -19,42 +22,41 @@ const MENU_ITEMS = [
 ];
 
 const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
-  // Inisialisasi state dengan membaca dari localStorage
-  const [isOpen, setIsOpen] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const savedState = localStorage.getItem('sidebarOpen');
-      return savedState !== null ? JSON.parse(savedState) : true;
-    }
-    return true;
-  });
+  const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [theme, setTheme] = useState<"dark" | "light">("light");
+  const [mounted, setMounted] = useState(false);  // State to check if client-side rendering
 
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme');
-      return savedTheme as "dark" | "light" || "light";
-    }
-    return "light";
-  });
-  
   const pathname = usePathname();
-  
-  // Efek untuk menyimpan state sidebar ke localStorage setiap kali berubah
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('sidebarOpen', JSON.stringify(isOpen));
-    }
-  }, [isOpen]);
 
-  // Efek untuk menyimpan tema ke localStorage
+  // Initialize theme and sidebar state after component mounts
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', theme);
+    if (typeof window !== "undefined") {
+      setMounted(true); // Mark as mounted after first render on client-side
+      const savedState = localStorage.getItem("sidebarOpen");
+      setIsOpen(savedState ? JSON.parse(savedState) : true);
+      
+      const savedTheme = localStorage.getItem("theme");
+      setTheme(savedTheme as "dark" | "light" || "light");
+    }
+  }, []);
+
+  // Effect for saving sidebar state to localStorage
+  useEffect(() => {
+    if (mounted && typeof window !== "undefined") {
+      localStorage.setItem("sidebarOpen", JSON.stringify(isOpen));
+    }
+  }, [isOpen, mounted]);
+
+  // Effect for saving theme state to localStorage
+  useEffect(() => {
+    if (mounted && typeof window !== "undefined") {
+      localStorage.setItem("theme", theme);
       document.documentElement.classList.toggle("dark", theme === "dark");
     }
-  }, [theme]);
+  }, [theme, mounted]);
 
   const getCurrentPageName = () => {
-    const currentMenuItem = MENU_ITEMS.find(item => item.href === pathname);
+    const currentMenuItem = MENU_ITEMS.find((item) => item.href === pathname);
     return currentMenuItem?.name || "Dashboard";
   };
 
@@ -63,11 +65,18 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   };
 
   const toggleSidebar = () => {
-    setIsOpen((prev: any) => !prev);
+    setIsOpen((prev) => !prev);
   };
 
+  // If not mounted, return null or a placeholder to avoid hydration issues
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className={`flex h-screen max-w-screen ${theme === "dark" ? "bg-gray-800" : "bg-gray-100"}`}>
+    <div
+      className={`flex h-screen max-w-screen ${theme === "dark" ? "bg-gray-800" : "bg-gray-100"}`}
+    >
       {/* Sidebar */}
       <div
         className={`${
