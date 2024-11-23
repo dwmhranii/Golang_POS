@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"fmt"
+	"golang_pos/config"
 	"golang_pos/models"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -73,8 +75,8 @@ func CreateSale(c *fiber.Ctx) error {
 			ProductID:  item.ProductID,
 			Quantity:   item.Quantity,
 			UnitPrice:  product.SellingPrice, // Ambil UnitPrice dari produk
-			TotalPrice: totalPrice,        // Hitung manual
-			Profit:     profit,            // Hitung manual
+			TotalPrice: totalPrice,           // Hitung manual
+			Profit:     profit,               // Hitung manual
 		})
 
 		// Update totalAmount dan totalProfit
@@ -99,7 +101,6 @@ func CreateSale(c *fiber.Ctx) error {
 		"data":    sale,
 	})
 }
-
 
 // GetSales - Ambil semua data penjualan dengan pagination
 func GetSales(c *fiber.Ctx) error {
@@ -235,4 +236,26 @@ func ExportSalesToPDF(c *fiber.Ctx) error {
 	}
 
 	return c.Download(filename)
+}
+
+func GetSaleByID(c *fiber.Ctx) error {
+	// Ambil ID dari parameter route
+	id := c.Params("id")
+	saleID, err := strconv.Atoi(id)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid sale ID",
+		})
+	}
+
+	// Cari sale berdasarkan ID
+	var sale models.Sale
+	if err := config.DB.Preload("Items").First(&sale, saleID).Error; err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"error": "Sale not found",
+		})
+	}
+
+	// Kembalikan data sale
+	return c.JSON(sale)
 }
