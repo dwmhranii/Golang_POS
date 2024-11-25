@@ -11,45 +11,64 @@ const PurchasesPage: React.FC = () => {
     const [token, setToken] = useState<string | null>(null);
     const router = useRouter();
 
-    // Fetch token from localStorage
     useEffect(() => {
-        const storedToken = localStorage.getItem("token");
+        // Ensure localStorage is only accessed client-side
+        const storedToken = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
         if (!storedToken) {
-            router.push("/"); // Redirect to login if no token is found
+            router.push("/");
             return;
         }
         setToken(storedToken);
     }, [router]);
 
-    // Fetch purchase data
     useEffect(() => {
         if (!token) return;
 
-        fetch("http://localhost:3010/api/purchases", {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then((response) => {
-                if (!response.ok) throw new Error("Unauthorized");
-                return response.json();
-            })
-            .then((data) => setData(data))
-            .catch((error) => {
-                console.error("Error fetching purchases:", error);
-                if (error.message === "Unauthorized") {
-                    router.push("/"); // Redirect to login on unauthorized error
+        const fetchPurchases = async () => {
+            try {
+                const response = await fetch("http://localhost:3010/api/purchases", {
+                    method: "GET", // Explicitly set method
+                    headers: { 
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch purchases");
                 }
-            });
+
+                const responseData = await response.json();
+                setData(responseData);
+            } catch (error) {
+                console.error("Error fetching purchases:", error);
+                router.push("/");
+            }
+        };
+
+        fetchPurchases();
     }, [token, router]);
 
-    const handleDelete = (purchase_id: number) => {
+    const handleDelete = async (purchase_id: number) => {
         if (!token) return;
 
-        fetch(`http://localhost:3010/api/purchases/${purchase_id}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then(() => setData(data.filter((item) => item.purchase_id !== purchase_id)))
-            .catch((error) => console.error("Error deleting purchase:", error));
+        try {
+            const response = await fetch(`http://localhost:3010/api/purchases/${purchase_id}`, {
+                method: "DELETE",
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to delete purchase");
+            }
+
+            setData(data.filter((item) => item.purchase_id !== purchase_id));
+        } catch (error) {
+            console.error("Error deleting purchase:", error);
+        }
     };
 
     const handleEdit = (item: any) => {
