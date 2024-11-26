@@ -24,6 +24,7 @@ const CategoryViewPage: React.FC = () => {
                 <SimpleView 
                     endpoint={`api/categories/${idCategory}`} 
                     token={token}
+                    viewPageType="category"
                 />
             </div>
         </div>

@@ -7,7 +7,8 @@ interface FormField {
     label: string;
     type: 'text' | 'password' | 'select' | 'email' | 'number' | 'date';
     defaultValue?: string | number;
-    options?: { label: string; value: string }[]; // Options for select fields
+    options?: { label: string; value: string }[];
+    disabled?: true | false; // Options for select fields
 }
 
 interface SimpleFormProps {

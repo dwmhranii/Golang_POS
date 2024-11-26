@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Button, Label, TextInput, Spinner, Alert } from 'flowbite-react';
+import { Button, Label, TextInput } from 'flowbite-react';
 import { Card } from 'flowbite-react';
 import { useRouter } from 'next/navigation';
 
@@ -14,6 +14,7 @@ interface SimpleViewProps {
         [key: string]: (value: any) => string;  // Custom formatters for specific fields
     };
     onBack?: () => void;
+    viewPageType?: 'category' | 'product' | 'purchase'; // Prop to determine page type
 }
 
 const SimpleView: React.FC<SimpleViewProps> = ({
@@ -22,11 +23,13 @@ const SimpleView: React.FC<SimpleViewProps> = ({
     title,
     excludeFields = ['id', 'created_at', 'updated_at'],
     formatters = {},
-    onBack
+    onBack,
+    viewPageType = 'category' // Default to 'category'
 }) => {
     const router = useRouter();
     const [data, setData] = useState<{ [key: string]: any } | null>(null);
-    const [category, setCategory] = useState<string | null>(null); // New state for category name
+    const [category, setCategory] = useState<string | null>(null);  // State for category name (only for view product)
+    const [product, setProduct] = useState<string | null>(null);  // State for product name (only for view purchase)
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -48,8 +51,8 @@ const SimpleView: React.FC<SimpleViewProps> = ({
                 const result = await response.json();
                 setData(result);
 
-                // Fetch category name based on category_id
-                if (result.category_id) {
+                // Fetch category name only if in the product view
+                if (viewPageType === 'product' && result.category_id) {
                     const categoryResponse = await fetch(`http://localhost:3010/api/categories/${result.category_id}`, {
                         method: 'GET',
                         headers: {
@@ -60,9 +63,27 @@ const SimpleView: React.FC<SimpleViewProps> = ({
 
                     if (categoryResponse.ok) {
                         const categoryData = await categoryResponse.json();
-                        setCategory(categoryData.name); // Assuming category data has 'name'
+                        setCategory(categoryData.name);  // Assuming category data has 'name'
                     } else {
                         setError('Failed to fetch category data');
+                    }
+                }
+
+                // Fetch product name only if in the purchase view
+                if (viewPageType === 'purchase' && result.product_id) {
+                    const productResponse = await fetch(`http://localhost:3010/api/products/${result.product_id}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    });
+
+                    if (productResponse.ok) {
+                        const productData = await productResponse.json();
+                        setProduct(productData.name);  // Assuming product data has 'name'
+                    } else {
+                        setError('Failed to fetch product data');
                     }
                 }
             } catch (err) {
@@ -73,15 +94,14 @@ const SimpleView: React.FC<SimpleViewProps> = ({
         };
 
         fetchData();
-    }, [endpoint, token]);
+    }, [endpoint, token, viewPageType]);
 
     const formatValue = (key: string, value: any): string => {
-        // If there's a custom formatter for this field, use it
+        // Use custom formatter if provided
         if (formatters[key]) {
             return formatters[key](value);
         }
 
-        // Default formatting based on value type
         if (value === null || value === undefined) return 'N/A';
         
         if (typeof value === 'boolean') return value ? 'Yes' : 'No';
@@ -89,7 +109,6 @@ const SimpleView: React.FC<SimpleViewProps> = ({
         if (value instanceof Date) return value.toLocaleDateString();
         
         if (typeof value === 'number') {
-            // Check if it looks like a currency value
             if (key.includes('price') || key.includes('amount') || key.includes('cost')) {
                 return `$${value.toFixed(2)}`;
             }
@@ -106,32 +125,6 @@ const SimpleView: React.FC<SimpleViewProps> = ({
             .join(' ');
     };
 
-    // if (loading) {
-    //     return (
-    //         <div className="flex items-center justify-center h-64">
-    //             <Spinner className="w-8 h-8" />
-    //         </div>
-    //     );
-    // }
-
-    // if (error) {
-    //     return (
-    //         <div className="p-4">
-    //             <Alert>
-    //                 {error}
-    //             </Alert>
-    //             {onBack && (
-    //                 <Button
-    //                     className="mt-4"
-    //                     onClick={onBack}
-    //                 >
-    //                     Back
-    //                 </Button>
-    //             )}
-    //         </div>
-    //     );
-    // }
-
     const displayTitle = title || `${endpoint.split('/')[1].charAt(0).toUpperCase() + endpoint.split('/')[1].slice(1)} Details`;
 
     const filteredEntries = data ? 
@@ -144,21 +137,12 @@ const SimpleView: React.FC<SimpleViewProps> = ({
     const rightColumnEntries = filteredEntries.slice(midpoint);
 
     return (
-        <><div className="p-4 max-w-4xl mx-auto">
+        <div className="p-4 max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold">{displayTitle}</h1>
-            <Button
-
-                onClick={onBack}
-            >
-                Back to List
-            </Button>
-        </div>
-        </div>
-        <Card className="max-w-4xl mx-auto">
-                {/* <Label>
-    
-    </Label> */}
+                <h1 className="text-2xl font-bold">{displayTitle}</h1>
+                <Button onClick={onBack}>Back to List</Button>
+            </div>
+            <Card className="max-w-4xl mx-auto">
                 <Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Left Column */}
@@ -169,7 +153,7 @@ const SimpleView: React.FC<SimpleViewProps> = ({
                                         {formatLabel(key)}
                                     </Label>
                                     <TextInput
-                                        value={key === 'category_id' && category ? category : formatValue(key, value)}
+                                        value={key === 'product_id' && viewPageType === 'purchase' && product ? product : formatValue(key, value)} // Show product name in purchase view
                                         disabled
                                         className="w-full" />
                                 </div>
@@ -184,7 +168,7 @@ const SimpleView: React.FC<SimpleViewProps> = ({
                                         {formatLabel(key)}
                                     </Label>
                                     <TextInput
-                                        value={key === 'category_id' && category ? category : formatValue(key, value)}
+                                        value={key === 'category_id' && viewPageType === 'product' && category ? category : formatValue(key, value)} // Show category name in product view
                                         disabled
                                         className="w-full" />
                                 </div>
@@ -192,7 +176,8 @@ const SimpleView: React.FC<SimpleViewProps> = ({
                         </div>
                     </div>
                 </Label>
-            </Card></>
+            </Card>
+        </div>
     );
 };
 

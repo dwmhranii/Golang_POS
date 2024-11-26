@@ -1,6 +1,5 @@
 "use client";
 
-import { type } from 'os';
 import React from 'react';
 
 interface SimpleTableProps {
@@ -22,7 +21,10 @@ const SimpleTable: React.FC<SimpleTableProps> = ({
   keyField
 }) => {
   const safeData = Array.isArray(data) ? data : [];
-  const headers = safeData.length > 0 ? Object.keys(safeData[0]) : [];
+  const excludeFields = ['created_at', 'updated_at', 'items', 'product']; // Kolom yang akan disembunyikan
+  const headers = safeData.length > 0 
+    ? Object.keys(safeData[0]).filter((key) => !excludeFields.includes(key)) 
+    : [];
 
   // Helper function to handle nested object values
   const getValue = (item: any, key: string) => {
@@ -31,7 +33,7 @@ const SimpleTable: React.FC<SimpleTableProps> = ({
     for (const k of keys) {
       value = value ? value[k] : "-"; // Traverse the keys or return "-" if not found
     }
-    return typeof value==='object' ? JSON.stringify(value) : value;
+    return typeof value === 'object' ? JSON.stringify(value) : value;
   };
 
   return (
@@ -41,7 +43,7 @@ const SimpleTable: React.FC<SimpleTableProps> = ({
           <tr className="bg-gray-100">
             {headers.map((header, index) => (
               <th
-                key={`${header}-${index}`} 
+                key={`${header}-${index}`}
                 className="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200"
               >
                 {header.replace('_', ' ')}

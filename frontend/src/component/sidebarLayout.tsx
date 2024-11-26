@@ -118,20 +118,27 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
         {/* Toggle Button */}
         <button
           onClick={toggleSidebar}
-          className="absolute -right-5 top-4 p-2 bg-gray-700 text-white rounded-full shadow-md focus:outline-none hover:bg-gray-600"
+          className="absolute left-100 top-4 p-2 bg-gray-700 text-white rounded-full shadow-md focus:outline-none hover:bg-gray-600"
         >
           {isOpen ? "←" : "→"}
         </button>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col max-h-screen overflow-auto">
         {/* Header */}
         <div className="flex justify-between items-center bg-white dark:bg-gray-800 shadow-md px-4 py-3">
           {/* Page Title */}
           <h1 className="text-lg font-bold text-gray-800 dark:text-white">
             {getCurrentPageName()}
           </h1>
+
+          {/* <button
+    onClick={toggleSidebar}
+    className="absolute right-1 top-5 p-2 bg-gray-700 text-white rounded-full shadow-md focus:outline-none hover:bg-gray-600"
+  >
+    {isOpen ? "←" : "→"}
+  </button> */}
 
           {/* Theme & GitHub Button */}
           <div className="flex items-center space-x-4">
@@ -142,7 +149,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
               {theme === "light" ? "🌞" : "🌙"}
             </button>
             <a
-              href="https://github.com/yourusername"
+              href="https://github.com/dwmhranii/Golang_POS.git"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"

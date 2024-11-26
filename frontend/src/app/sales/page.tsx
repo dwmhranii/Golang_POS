@@ -9,23 +9,26 @@ import Breadcrumbs from "@/src/component/Breadcrumbs";
 const TransactionPage = () => {
   const router = useRouter();
   const [data, setData] = useState<any[]>([]);
-  const token = localStorage.getItem("token"); // JWT token untuk autentikasi
+  const [token, setToken] = useState<string | null>(null); // State untuk token
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = async (authToken: string | null) => {
+    if (!authToken) return; // Jika token tidak ada, hentikan fetch
     try {
       const res = await fetch("http://localhost:3010/api/sales", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${authToken}` },
       });
       const result = await res.json();
-        console.log("Fetched Data:", result); // Log full result
-        setData(result.data || []);
+      console.log("Fetched Data:", result); // Log full result
+      setData(result.data || []);
     } catch (error) {
       console.error("Failed to fetch transactions:", error);
     }
   };
 
   useEffect(() => {
-    fetchTransactions();
+    const authToken = localStorage.getItem("token"); // Ambil token dari localStorage
+    setToken(authToken); // Simpan ke state
+    fetchTransactions(authToken); // Fetch data dengan token
   }, []);
 
   const handleView = (item: any) => {
@@ -43,14 +46,14 @@ const TransactionPage = () => {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
-        fetchTransactions();
+        fetchTransactions(token); // Refresh data setelah delete
       } catch (error) {
         console.error("Failed to delete transaction:", error);
       }
     }
   };
 
-  console.log("Transaction Data:", data); // Add this line to log the data before passing to SimpleTable
+  console.log("Transaction Data:", data); // Log data untuk debugging
 
   return (
     <SidebarLayout>

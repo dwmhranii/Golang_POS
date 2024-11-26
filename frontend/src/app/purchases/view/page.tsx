@@ -24,6 +24,7 @@ const PurchaseViewPage: React.FC = () => {
                 <SimpleView 
                     endpoint={`api/purchases/${idPurchase}`} 
                     token={token}
+                    viewPageType="purchase"
                 />
             </div>
         </div>
