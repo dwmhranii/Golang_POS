@@ -55,7 +55,7 @@ const TransactionPage = () => {
   return (
     <SidebarLayout>
       <Breadcrumbs />
-      <div>
+      <div className="h-full">
         <div className="flex justify-end mb-4">
           <button
             className="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-700 mr-2"
