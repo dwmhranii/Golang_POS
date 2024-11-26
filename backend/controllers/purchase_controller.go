@@ -4,8 +4,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 	"golang_pos/models"
+	"fmt"
 )
 
+// Create Purchase
 // Create Purchase
 func CreatePurchase(c *fiber.Ctx) error {
     db := c.Locals("db").(*gorm.DB)
@@ -13,8 +15,11 @@ func CreatePurchase(c *fiber.Ctx) error {
 
     // Parsing body JSON
     if err := c.BodyParser(purchase); err != nil {
+        fmt.Println("BodyParser error:", err) // Debugging
         return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
     }
+
+    fmt.Printf("Parsed Purchase: %+v\n", purchase) // Debugging
 
     // Validasi input
     if purchase.Quantity <= 0 {
@@ -25,17 +30,42 @@ func CreatePurchase(c *fiber.Ctx) error {
         return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cost Price cannot be negative"})
     }
 
+    // Mulai transaksi
+    tx := db.Begin()
+
     // Hitung TotalCost
     purchase.TotalCost = float64(purchase.Quantity) * purchase.CostPrice
 
-    // Insert ke database
-    if err := db.Create(&purchase).Error; err != nil {
+    fmt.Println("Total cost calculated:", purchase.TotalCost) // Debugging
+
+    // Cek apakah produk tersedia
+    var product models.Product
+    if err := tx.First(&product, purchase.ProductID).Error; err != nil {
+        tx.Rollback()
+        fmt.Println("Product not found error:", err) // Debugging
+        return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Product not found"})
+    }
+
+    // Update stok produk
+    product.Stock += purchase.Quantity // Tambahkan stok
+    if err := tx.Save(&product).Error; err != nil {
+        tx.Rollback()
+        fmt.Println("Failed to update product stock:", err) // Debugging
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update product stock"})
+    }
+
+    // Simpan pembelian
+    if err := tx.Create(&purchase).Error; err != nil {
+        tx.Rollback()
+        fmt.Println("Failed to create purchase:", err) // Debugging
         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
     }
 
+    // Commit transaksi
+    tx.Commit()
+
     return c.Status(fiber.StatusCreated).JSON(purchase)
 }
-
 
 // Get All Purchases
 func GetPurchases(c *fiber.Ctx) error {
